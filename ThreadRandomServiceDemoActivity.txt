@@ -1,0 +1,104 @@
+package com.example.siomarry.threadrandomservicedemo;
+
+import android.content.Intent;
+import android.os.Handler;
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
+
+import static com.example.siomarry.threadrandomservicedemo.RandomService.run_flag;
+import static com.example.siomarry.threadrandomservicedemo.RandomService.t_min;
+import static com.example.siomarry.threadrandomservicedemo.RandomService.t_psec;
+import static com.example.siomarry.threadrandomservicedemo.RandomService.t_sec;
+
+public class ThreadRandomServiceDemoActivity extends AppCompatActivity {
+
+    private static Handler handle=new Handler();
+    private static TextView labelView=null;
+    private static String str;
+    public static boolean temp_flag=false;
+
+
+
+
+    /*public static  void UpdateGUI(double refreshDouble){
+        randomDouble=refreshDouble;//randomDouble是静态的
+        handle.post(RefreshLable);//函数调用一个静态的，使之在主线程中显示GUI
+
+    }*/
+    public static void UpdateGUI(String time){
+        str = time;
+        if(temp_flag){
+            str=time;
+        }
+        handle.post(RefreshLable);
+    }
+    private static Runnable RefreshLable = new Runnable() {
+        @Override
+        public void run() {
+            if(temp_flag){
+                Log.i("TAGTAG",str);
+            }else{
+            labelView.setText(str);}
+            labelView.setText(str);
+        }
+    };
+    /*private static Runnable RefreshLable=new Runnable() {
+        @Override
+        public void run() {
+            labelView.setText(String.valueOf(randomDouble));
+        }
+    };*/
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.simple);
+
+        labelView=(TextView)findViewById(R.id.label);
+        Button startButton=(Button)findViewById(R.id.statbutton);
+        Button endButton = (Button)findViewById(R.id.endbutton);
+        Button zeroButton = (Button)findViewById(R.id.zerobutton);
+
+        final Intent serviceIntent=new Intent(this,RandomService.class);
+
+
+        startButton.setOnClickListener(new Button.OnClickListener(){
+            public void onClick(View view){
+                run_flag=1;
+                startService(serviceIntent);
+                temp_flag=false;
+            }
+        });
+
+
+        zeroButton.setOnClickListener(new Button.OnClickListener(){
+            public  void onClick(View view){
+            //    Thread.interrupted();
+                stopService(serviceIntent);
+                run_flag = 0;
+                t_psec = 00;
+                t_min = 00;
+                t_sec = 00;
+                temp_flag=true;
+                //labelView.setText("00:00:00");
+            }
+        });
+        endButton.setOnClickListener(new Button.OnClickListener(){
+            public void onClick(View view){
+                run_flag = 0;
+                stopService(serviceIntent);
+
+            }
+        });
+
+
+
+
+
+    }
+}
+
